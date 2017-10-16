@@ -1,13 +1,12 @@
+@load ./main
+
 module HTTPDetect;
 
 export {
-    global webserver_ips: set[addr] = { 199.7.51.190 };
-    global ip_whitelist: set[subnet] = { 87.106.0.0/16 };
     redef enum Notice::Type += { Random_Subdomains };
 
-    global time_threshold = 10min;
     global bad_subdomain_threshold: double = 10.0;
-    global entropy_threshold: double = 2.0;
+    global entropy_threshold: double = 3.5;
 }
 
 event bro_init()
@@ -15,7 +14,7 @@ event bro_init()
     local r1 = SumStats::Reducer($stream="Suspicious Subdomain", $apply=set(SumStats::UNIQUE));
 
     SumStats::create([$name = "counting bad subdomains",
-	    $epoch =  HTTPDetect::time_threshold,
+	    $epoch =  MainDetect::time_threshold,
 	    $reducers = set(r1),
 	    $threshold = HTTPDetect::bad_subdomain_threshold,
 	    $threshold_val(key: SumStats::Key, result: SumStats::Result) =
@@ -25,12 +24,9 @@ event bro_init()
 	    $threshold_crossed(key: SumStats::Key, result: SumStats::Result) =
 	    {
 	        local domains = "";
-            local cnt: count = 0;
 	        for (p in result["Suspicious Subdomain"]$unique_vals)
-	        {
-                ++cnt;
 	            domains += p$str + ", ";
-	        }
+
 	        domains = sub_bytes(domains, 0, |domains| - 2);
 	        NOTICE([$note=HTTPDetect::Random_Subdomains,
                 $src = key$host,
@@ -56,7 +52,7 @@ event http_reply(c: connection, version: string, code: count, reason: string)
     if (c$http$host == ip_addr_regex)
     {
         # Skip anything in the IP whitelist
-        if (to_addr(c$http$host) in HTTPDetect::ip_whitelist)
+        if (to_addr(c$http$host) in MainDetect::ip_whitelist)
             return;
 
         # Observe any host connecting to an IP.
