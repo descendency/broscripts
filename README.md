@@ -1,2 +1,2 @@
 # broscripts
-A bunch of random bro scripts as I try to learn Bro Scripting
+Some random Bro scripts as I learn Bro Scripting
