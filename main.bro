@@ -5,6 +5,10 @@ export {
 
     global ip_whitelist: set[subnet] = {  };
 
+    global port_list: set[port] = { };
+
+    global server_list: set[addr] = { };
+
     global web_servers: set[addr] = { };
     global dns_servers: set[addr] = { };
     global file_servers: set[addr] = { };
