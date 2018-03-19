@@ -1,6 +1,3 @@
-# Note: None of the IPs listed in this script are my personal servers. It's just an example set
-# to help you with your scripting ideas.
-
 module TestModule;
 
 export {
@@ -15,14 +12,7 @@ global localips: set[subnet] = {
 };
 
 # Server ports used inside of the local network
-global serverports: set[port] = {
-    25/tcp,
-    80/tcp,
-    443/tcp,
-};
-
-# Names of services running on local server ports
-global servicenames: table[port] of string = {
+global serverports: table[port] of string = {
     [20/tcp] = "FTP",
     [21/tcp] = "FTP",
     [22/tcp] = "SSH",
@@ -84,7 +74,7 @@ event new_connection(c: connection)
     if (c$id$resp_h in localips && c$id$resp_p in serverports && (c$id$resp_p !in servers || c$id$resp_h !in servers[c$id$resp_p]))
     {
         NOTICE([$note=TestModule::Unauthorized_Server,
-                $msg = "Unauthorized " + servicenames[c$id$resp_p] + " server: " + addr_to_uri(c$id$resp_h),
+                $msg = "Unauthorized " + serverports[c$id$resp_p] + " server: " + addr_to_uri(c$id$resp_h),
                 $n = 1,
                 $conn = c,
                 $uid = c$uid]);
@@ -95,7 +85,7 @@ event new_connection(c: connection)
     if (c$id$orig_h in localips && c$id$orig_p in serverports && (c$id$orig_p !in servers || c$id$orig_h !in servers[c$id$orig_p]))
     {
         NOTICE([$note=TestModule::Unauthorized_Server,
-                $msg = "Unauthorized " + servicenames[c$id$orig_p] + " server: " + addr_to_uri(c$id$orig_h),
+                $msg = "Unauthorized " + serverports[c$id$orig_p] + " server: " + addr_to_uri(c$id$orig_h),
                 $n = 1,
                 $conn = c,
                 $uid = c$uid]);
